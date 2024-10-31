@@ -1,11 +1,11 @@
 import * as React from "react";
 import { Line, LineChart, ResponsiveContainer, Tooltip } from "recharts";
-
 import { Card } from "@/components/ui/card";
 import { useTheme } from "next-themes";
 
 export function Chart({ data }: { data: any[] }) {
-  const { theme: mode } = useTheme();
+  // We'll remove the unused mode variable
+  useTheme(); // Keep the hook in case we need theme context elsewhere
 
   return (
     <ResponsiveContainer width="100%" height={200}>
