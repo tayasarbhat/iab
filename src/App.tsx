@@ -1,5 +1,4 @@
 import { useState, useRef } from 'react';
-import { Button } from "@/components/ui/button";
 import { PlanCard } from './components/PlanCard';
 import { PlanForm } from './components/PlanForm';
 import html2canvas from 'html2canvas';
@@ -35,33 +34,37 @@ function App() {
   const downloadPoster = async () => {
     if (posterRef.current) {
       try {
-        // Wait for images to load
-        const images = posterRef.current.getElementsByTagName('img');
-        await Promise.all(Array.from(images).map(img => {
-          if (img.complete) return Promise.resolve();
-          return new Promise((resolve) => {
-            img.onload = resolve;
-            img.onerror = resolve;
-          });
-        }));
+        // Preload the logo image
+        await new Promise((resolve) => {
+          const img = new Image();
+          img.crossOrigin = "anonymous";
+          img.onload = resolve;
+          img.src = "https://backup.xadtechnologies.com/wp-content/uploads/2022/10/Eti-New-logo.png";
+        });
 
-        // Capture the poster
         const canvas = await html2canvas(posterRef.current, {
           scale: 2,
+          backgroundColor: null,
           useCORS: true,
           allowTaint: true,
-          backgroundColor: null,
           imageTimeout: 0,
           logging: false,
           onclone: (clonedDoc) => {
-            const element = clonedDoc.querySelector('[data-html2canvas-ignore]');
-            if (element) {
-              element.remove();
-            }
+            // Ensure gradients and effects are preserved
+            const styles = document.createElement('style');
+            styles.innerHTML = `
+              .bg-gradient-to-r { background: linear-gradient(to right, var(--tw-gradient-stops)); }
+              .bg-gradient-to-br { background: linear-gradient(to bottom right, var(--tw-gradient-stops)); }
+              .bg-gradient-to-b { background: linear-gradient(to bottom, var(--tw-gradient-stops)); }
+              .blur-2xl { filter: blur(40px); }
+              .backdrop-blur-xl { backdrop-filter: blur(24px); }
+              .backdrop-blur-sm { backdrop-filter: blur(4px); }
+            `;
+            clonedDoc.head.appendChild(styles);
           }
         });
         
-        // Convert and download
+        // Convert and download with maximum quality
         const image = canvas.toDataURL('image/png', 1.0);
         const link = document.createElement('a');
         link.href = image;
@@ -83,12 +86,12 @@ function App() {
               onChange={setPlanDetails} 
             />
             <div className="mt-4 flex justify-center">
-              <Button 
+              <button 
                 onClick={downloadPoster}
-                className="w-full bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                className="w-full px-4 py-2 rounded-lg bg-gradient-to-r from-blue-600 to-blue-800 hover:from-blue-700 hover:to-blue-900 text-white shadow-lg hover:shadow-xl transition-all duration-300"
               >
                 Download Poster
-              </Button>
+              </button>
             </div>
           </div>
           
